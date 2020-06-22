@@ -1,0 +1,24 @@
+#version 440 core
+
+layout(local_size_x = 1, local_size_y = 1) in;
+
+layout(binding = 0) uniform sampler2D imageInput;
+layout(rg32f, binding = 1) writeonly restrict uniform image2D imageOutput;
+
+void main() {
+    ivec2 pixelCoord = ivec2(gl_GlobalInvocationID.xy);
+
+    const int windowSize = 33;
+
+    vec4 colorSum = vec4(0.0);
+    float weightSum = 0.0;
+
+    for (int x = pixelCoord.x - windowSize / 2; x <= pixelCoord.x + windowSize / 2; x++) {
+        for (int y = pixelCoord.y - windowSize / 2; y <= pixelCoord.y + windowSize / 2; y++) {
+            colorSum += texelFetch(imageInput, ivec2(x, y));
+            weightSum += 1.0;
+        }
+    }
+
+    imageStore(imageOutput, pixelCoord, colorSum / weightSum);
+}
